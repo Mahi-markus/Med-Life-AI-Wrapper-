@@ -21,25 +21,35 @@ def ocr_extract_prescription(text_content=None, base64_image=None):
     # CASE 1: PDF text (NO image)
     # --------------------------
     if base64_image is None:
-        user_content = text_content  # must be a simple string
-        print("USER CONTENT WITH TEXT:", user_content)
+        user_content = f"""
+                Extract structured prescription data from the following text.
 
-    # --------------------------
-    # CASE 2: Image input (Vision)
-    # --------------------------
-    else:
-        user_content = [
-            {
-                "type": "input_text",
-                "text": """
-Extract structured prescription data and return ONLY JSON.
-                """
-            },
-            {
-                "type": "input_image",
-                "image_url": f"data:image/jpeg;base64,{base64_image}"
-            }
-        ]
+                Return ONLY valid JSON. No explanation.
+
+                TEXT:
+                \"\"\"{text_content}\"\"\"
+
+                JSON FORMAT:
+                {{
+                "patient": {{
+                    "name": "string",
+                    "email": "string"
+                }},
+                "prescription": {{
+                    "analogy": "string"
+                }},
+                "medicines": [
+                    {{
+                    "name": "string",
+                    "expire_date": "YYYY-MM-DD",
+                    "dosage": "string",
+                    "instruction": "string",
+                    "number_of_pills_in_day": int,
+                    "part_of_day": "morning/evening/night"
+                    }}
+                ]
+                }}
+"""
         #print("USER CONTENT WITH IMAGE:", user_content)
 
     # --------------------------
@@ -76,5 +86,11 @@ Extract structured prescription data and return ONLY JSON.
         raise ValueError(f"OCR API Error: {data}")
 
     # Return the AI-generated JSON
-    print("OCR EXTRACTED JSON1111:", data["choices"][0]["message"]["content"])
-    return data["choices"][0]["message"]["content"]
+    raw = data["choices"][0]["message"]["content"]
+
+    # Clean markdown code fences
+    if raw.startswith("```"):
+        raw = raw.strip().replace("```json", "").replace("```", "").strip()
+        print("OCR CLEANED JSON:", raw)
+
+    return raw

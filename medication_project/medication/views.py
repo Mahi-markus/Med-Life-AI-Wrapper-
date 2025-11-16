@@ -10,6 +10,7 @@ def process_prescription(request):
         return JsonResponse({"error": "POST only"}, status=400)
     print("REQUEST FILES:", request.FILES)
     uploaded_file = request.FILES.get("file")
+    print("UPLOADED FILEeeeeeeeeeeeeeeeeeeeeeeeeeee:", uploaded_file)
     
     if not uploaded_file:
         return JsonResponse({"error": "No file provided"}, status=400)
