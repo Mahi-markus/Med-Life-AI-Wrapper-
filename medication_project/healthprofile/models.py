@@ -1,17 +1,35 @@
 from django.db import models
 from medication.models import Patient
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 # Create your models here.
 
 class healthProfile(models.Model):
-    patient=models.OneToOneField(Patient,on_delete=models.CASCADE)
-    age = models.IntegerField()
-    weight = models.FloatField()
-    height = models.FloatField()
-    disease =  models.TextField()
-    addition_info = models.TextField(null=True,blank=True)
+    patient = models.OneToOneField(Patient, on_delete=models.CASCADE)
+    age = models.IntegerField(
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(120)
+        ]
+    )
+    weight = models.FloatField(
+        validators=[MinValueValidator(1)]
+    )
+    height = models.FloatField(
+        validators=[MinValueValidator(0.3)]
+    )
+    disease = models.TextField()
+    addition_info = models.TextField(null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.patient.name} - Profile"
+    def clean(self):
+        print("clean called...")
+        bmi = self.weight / (self.height ** 2)
+        if bmi < 10 or bmi > 60:
+            raise ValidationError('The calculated BMI is out of realistic range.')
+        
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
     
 class HealthPlan(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
@@ -31,6 +49,30 @@ class DailyProgress(models.Model):
     mood = models.CharField(max_length=50,null=True,blank=True)
     progress_note =models.TextField(null=True, blank=True)
 
+    def clean(self):
+        if self.progress_note and len(self.progress_note) <20:
+           raise ValidationError({"progress_note: it must be greater then 20 character"})
+        if self.mood and len(self.mood) <3:
+           raise ValidationError({"mood: it must be greater then 3 character"})
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
     def __str__(self):
-        return f"Progress {self.patient.name} - {self.date}"  
+        return f"Progress {self.patient.name} - {self.date}" 
+class DietaryRecommendation(models.Model):
+    patient = models.ForeignKey(Patient,on_delete=models.CASCADE)
+    breakfast = models.TextField()
+    lunch = models.TextField()
+    dinner = models.TextField()
+    snacks = models.TextField(null=True,blank=True)
+    food_to_avoid = models.TextField(null=True,blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    
+
+    def __str__(self):
+        return f"Dietary Recommendation for {self.patient.name} on {self.created_at.date()}"     
+class ExerciseRecommendation(models.Model):
+    Patient = models.ForeignKey(Patient,on_delete=models.CASCADE)
+    recommendation = models.TextField()
 
