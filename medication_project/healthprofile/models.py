@@ -15,17 +15,36 @@ class healthProfile(models.Model):
     weight = models.FloatField(
         validators=[MinValueValidator(1)]
     )
-    height = models.FloatField(
+    height_feet = models.FloatField(
+        default=5,
         validators=[MinValueValidator(0.3)]
     )
+    height_inches = models.FloatField(default=0,
+        validators=[MinValueValidator(0)]
+    )
+    bmi = models.FloatField( null=True, blank=True)
     disease = models.TextField()
     addition_info = models.TextField(null=True, blank=True)
 
     def clean(self):
         print("clean called...")
-        bmi = self.weight / (self.height ** 2)
-        if bmi < 10 or bmi > 60:
-            raise ValidationError('The calculated BMI is out of realistic range.')
+
+        if not self.height_feet or self.weight is None:
+            return
+
+        # Convert to total inches first
+        total_inches = (self.height_feet * 12) + (self.height_inches or 0)
+
+        # Convert inches → meters
+        height_in_m = total_inches * 0.0254
+
+        # Weight assumed in kg
+        bmi = self.weight / (height_in_m ** 2)
+
+        # if bmi < 10 or bmi > 60:
+        #     raise ValidationError('The calculated BMI is out of realistic range.')
+
+        self.bmi = round(bmi, 2)
         
     def save(self, *args, **kwargs):
         self.full_clean()

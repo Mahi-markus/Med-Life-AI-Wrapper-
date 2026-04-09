@@ -6,7 +6,7 @@ from .models import healthProfile, HealthPlan, DailyProgress
 
 @admin.register(healthProfile)
 class HealthProfileAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'age', 'weight', 'height', 'disease_summary')
+    list_display = ('patient', 'age', 'weight', 'disease_summary')
     list_filter = ('age', 'disease')
     search_fields = ('patient__name', 'disease', 'addition_info')  # Assuming Patient has a 'name' field
     # readonly_fields = ('patient',)  # Usually, the patient is set once
