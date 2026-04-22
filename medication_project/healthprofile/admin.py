@@ -1,12 +1,12 @@
 # admin.py
 
 from django.contrib import admin
-from .models import healthProfile, HealthPlan, DailyProgress
+from .models import healthProfile, HealthPlan, DailyProgress,DietaryRecommendation
 
 
 @admin.register(healthProfile)
 class HealthProfileAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'age', 'weight', 'height', 'disease_summary')
+    list_display = ('patient', 'age', 'weight', 'disease_summary')
     list_filter = ('age', 'disease')
     search_fields = ('patient__name', 'disease', 'addition_info')  # Assuming Patient has a 'name' field
     # readonly_fields = ('patient',)  # Usually, the patient is set once
@@ -42,5 +42,11 @@ class DailyProgressAdmin(admin.ModelAdmin):
     search_fields = ('patient__name', 'mood', 'progress_note')
     date_hierarchy = 'date'
 
+@admin.register(DietaryRecommendation)
+class DietaryRecommendationAdmin(admin.ModelAdmin):
+    list_display = ('patient', 'breakfast', 'lunch', 'dinner')
+    search_fields = ('patient__name', 'breakfast', 'lunch', 'dinner')
+
     # Optional: Group recent progress by patient using inlines (if you want to see them under HealthProfile)
+
     # But here it's kept as a separate admin for easy daily tracking
