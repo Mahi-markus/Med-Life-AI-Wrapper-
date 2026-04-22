@@ -6,8 +6,9 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from medication.models import Patient
 from rest_framework_simplejwt.views import TokenRefreshView
-
 User = get_user_model()
+
+
 
 @api_view(['POST'])
 def register(request):

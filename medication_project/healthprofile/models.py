@@ -2,9 +2,12 @@ from django.db import models
 from medication.models import Patient
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
+User = get_user_model()
 # Create your models here.
 
 class healthProfile(models.Model):
+    user = models.OneToOneField(User, default=None,on_delete=models.CASCADE)
     patient = models.OneToOneField(Patient, on_delete=models.CASCADE)
     age = models.IntegerField(
         validators=[
@@ -54,7 +57,7 @@ class HealthPlan(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     food_chart = models.TextField()
     exercise_plan = models.TextField()
-    sleep_plan = models.TextField(null=True,blank=True)
+    sleep_plan = models.TextField(null=True,blank=True) 
     generated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

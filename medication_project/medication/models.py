@@ -1,6 +1,9 @@
 # medication/models.py
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 
 
 
@@ -15,7 +18,8 @@ class time_slot(models.Model):
 class Patient(models.Model):
     patient_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, default=None, null=True,  related_name="patient_profile")
 
     def __str__(self):
         return self.name
